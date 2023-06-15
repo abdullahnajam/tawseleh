@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "1095642113215",
+    "project_id": "twaseleh",
+    "storage_bucket": "twaseleh.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095642113215:android:6380eac2d0652d4131120a",
+        "android_client_info": {
+          "package_name": "com.rideapp.tawseleh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1095642113215-hgacrloor3ngcg5gskv5ov8b09j3jjmj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rideapp.tawseleh",
+            "certificate_hash": "d16203b70ad6e4b805694c9a19c9a8403670e647"
+          }
+        },
+        {
+          "client_id": "1095642113215-o7trftc50nd3u8h399mino924vacuemj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rideapp.tawseleh",
+            "certificate_hash": "707708b03d0483f2991640bbb6419453f0f60087"
+          }
+        },
+        {
+          "client_id": "1095642113215-s2gvpg42kg0j4rqvlproj4nr6qtgebld.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rideapp.tawseleh",
+            "certificate_hash": "468735234a10615a9d18f1cb8c17645d1c905f4c"
+          }
+        },
+        {
+          "client_id": "1095642113215-m348lbip2ttkno6cf9o7t2l2089lkbpp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKne-25jhK0QEq8XVCI2ITOWoeNv1-0jI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1095642113215-m348lbip2ttkno6cf9o7t2l2089lkbpp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

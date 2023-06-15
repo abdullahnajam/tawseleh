@@ -1,0 +1,290 @@
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:maps_launcher/maps_launcher.dart';
+import 'package:tawseleh/model/user_model.dart';
+import 'package:timeago/timeago.dart';
+
+import '../api/db_api.dart';
+import '../utils/constants.dart';
+import 'image_viewer.dart';
+import 'voice_message.dart';
+
+class ChatWidget{
+
+  static Widget reply(BuildContext context,String message,mediaType,int timestamp){
+    return Column(
+      children: [
+        if(mediaType==MediaType.plainText)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              /* if(item.isReply)
+                buildReplyItem(context, item.replyId),*/
+              Container(
+                constraints: BoxConstraints(minWidth: 150),
+                child: Text(message, style: TextStyle(
+                    color: Colors.black)
+                ),
+              ),
+              Container(height: 3, width: 0),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(format(DateTime.fromMillisecondsSinceEpoch(timestamp)), textAlign: TextAlign.end, style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),),
+                  Container(width: 3),
+                ],
+              )
+            ],
+          )
+          //Text(format(DateTime.fromMillisecondsSinceEpoch(timestamp)), textAlign: TextAlign.end, style: TextStyle(fontSize: 10, color: Colors.grey,),)
+        else if(mediaType==MediaType.image)
+          InkWell(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) =>  ViewImage(message)));
+
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              child:  Image.network(message, height: MediaQuery.of(context).size.width*0.5,fit: BoxFit.cover,),
+            )
+          )
+
+        else if(mediaType==MediaType.audio)
+            Container(
+                height: 60,
+                child: AudioBubble(filepath: message,timeStamp: timestamp)
+            )
+        else if(mediaType==MediaType.location)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    /* if(item.isReply)
+                buildReplyItem(context, item.replyId),*/
+                    Container(
+                      constraints: BoxConstraints(minWidth: 150),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(message.substring(message.indexOf('+')+1), style: TextStyle(color: Colors.black),),
+                          //Text(message, style: TextStyle(color: Colors.black),),
+                          SizedBox(height: 5,),
+                          InkWell(
+                            onTap: (){
+                              print(message);
+                              //print('lat ${message.substring(0, message.indexOf(':'))} : lng ${message.substring(message.indexOf(':')+1, message.indexOf('+'))}');
+                              double lat=double.parse(message.substring(0, message.indexOf(':')));
+                              double lng=double.parse(message.substring(message.indexOf(':')+1, message.indexOf('+')));
+                              MapsLauncher.launchCoordinates(lat, lng);
+                            },
+                            child: Text('Show on map', style: TextStyle(color: primaryColor)),
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(height: 3, width: 0),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(format(DateTime.fromMillisecondsSinceEpoch(timestamp)), textAlign: TextAlign.end, style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),),
+                        Container(width: 3),
+                      ],
+                    )
+                  ],
+                )
+
+      ],
+    );
+  }
+
+
+  static Widget showImage(BuildContext context,bool isMe, url){
+    return InkWell(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) =>  ViewImage(url)));
+
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width*0.5,
+        //height: MediaQuery.of(context).size.width*0.5,
+        child: Card(
+            shape: RoundedRectangleBorder( borderRadius: BorderRadius.circular(5),),
+            margin: EdgeInsets.fromLTRB(isMe ? 20 : 10, 5, isMe ? 10 : 20, 5),
+            color: isMe ? meChatBubble : Colors.white, elevation: 1,
+            child : Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              child:  Image.network(url, height: MediaQuery.of(context).size.width*0.5,fit: BoxFit.cover,),
+            )
+        ),
+      ),
+    );
+  }
+
+
+
+  static Widget showText(bool isMe,String message,int timestamp){
+    return Card(
+        shape: RoundedRectangleBorder( borderRadius: BorderRadius.circular(5),),
+        margin: EdgeInsets.fromLTRB(isMe ? 20 : 10, 5, isMe ? 10 : 20, 5),
+        color: isMe ? meChatBubble : Colors.white, elevation: 1,
+        child : Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+             /* if(item.isReply)
+                buildReplyItem(context, item.replyId),*/
+              Container(
+                constraints: BoxConstraints(minWidth: 150),
+                child: Text(message, style: TextStyle(
+                    color: Colors.black)
+                ),
+              ),
+              Container(height: 3, width: 0),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(format(DateTime.fromMillisecondsSinceEpoch(timestamp)), textAlign: TextAlign.end, style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),),
+                  Container(width: 3),
+                ],
+              )
+            ],
+          ),
+        )
+    );
+  }
+
+  static Widget showLocation(bool isMe,String message,int timestamp){
+    return Card(
+        shape: RoundedRectangleBorder( borderRadius: BorderRadius.circular(5),),
+        margin: EdgeInsets.fromLTRB(isMe ? 20 : 10, 5, isMe ? 10 : 20, 5),
+        color: isMe ? meChatBubble : Colors.white, elevation: 1,
+        child : Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              /* if(item.isReply)
+                buildReplyItem(context, item.replyId),*/
+              Container(
+                constraints: BoxConstraints(minWidth: 150),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(message.substring(message.indexOf('+')+1), style: TextStyle(color: Colors.black),),
+                    SizedBox(height: 5,),
+                    InkWell(
+                      onTap: (){
+                        print('lat ${message.substring(0, message.indexOf(':'))} : lng ${message.substring(message.indexOf(':')+1, message.indexOf('+'))}');
+                        double lat=double.parse(message.substring(0, message.indexOf(':')));
+                        double lng=double.parse(message.substring(message.indexOf(':')+1, message.indexOf('+')));
+                        MapsLauncher.launchCoordinates(lat, lng);
+                        },
+                      child: Text('Show on map', style: TextStyle(color: primaryColor)),
+                    )
+                  ],
+                ),
+              ),
+
+              Container(height: 3, width: 0),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(format(DateTime.fromMillisecondsSinceEpoch(timestamp)), textAlign: TextAlign.end, style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),),
+                  Container(width: 3),
+                ],
+              )
+            ],
+          ),
+        )
+    );
+  }
+
+  static Widget showAudio(bool isMe,String message,int timestamp){
+    return Container(
+        height: 45,
+        width: 200,
+        margin: EdgeInsets.fromLTRB(isMe ? 20 : 10, 5, isMe ? 10 : 20, 5),
+        padding: const EdgeInsets.only(left: 12, right: 18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+
+          color: isMe ? meChatBubble : Colors.white,
+        ),
+        child: AudioBubble(filepath: message,timeStamp: timestamp)
+    );
+  }
+
+  static Widget loader(BuildContext context,bool isMe,senderId){
+
+    return Wrap(
+      alignment: isMe ? WrapAlignment.end : WrapAlignment.start,
+      children: <Widget>[
+        isMe ? Container(): Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: FutureBuilder<UserModel>(
+              future: DBApi.getUserData(senderId),
+              builder: (context, AsyncSnapshot<UserModel> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircleAvatar(
+                    backgroundColor: primaryColor,
+                    maxRadius: 20,
+                    minRadius: 20,
+                  );
+                }
+                else {
+                  if (snapshot.hasError) {
+                    print("error ${snapshot.error}");
+                    return CircleAvatar(
+                      backgroundColor: primaryColor,
+                      maxRadius: 20,
+                      minRadius: 20,
+                    );
+                  }
+
+
+                  else {
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(snapshot.data!.profilePic),
+                      maxRadius: 20,
+                      minRadius: 20,
+                    );
+
+                  }
+                }
+              }
+          ),
+        ),
+
+        Card(
+            shape: RoundedRectangleBorder( borderRadius: BorderRadius.circular(5),),
+            margin: EdgeInsets.fromLTRB(isMe ? 20 : 10, 5, isMe ? 10 : 20, 5),
+            color: isMe ? meChatBubble : Colors.white, elevation: 1,
+            child : Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              child:  CupertinoActivityIndicator(),
+            )
+        ),
+
+      ],
+    );
+  }
+}
