@@ -162,6 +162,8 @@ class _SearchIndividualState extends State<SearchIndividual> {
                                       await FirebaseFirestore.instance.collection('chat_head').doc("${FirebaseAuth.instance.currentUser!.uid}_${snapshot.data![index].userId}").set({
                                         "user1":FirebaseAuth.instance.currentUser!.uid,
                                         "user2":snapshot.data![index].userId,
+                                        "lastCounter":0,
+                                        "serverTime":FieldValue.serverTimestamp(),
                                         "timestamp":DateTime.now().millisecondsSinceEpoch,
                                       });
                                       Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) =>  ChatScreen("${FirebaseAuth.instance.currentUser!.uid}_${snapshot.data![index].userId}")));

@@ -256,6 +256,8 @@ class _RideListScreenState extends State<RideListScreen> {
                                 await FirebaseFirestore.instance.collection('chat_head').doc("${FirebaseAuth.instance.currentUser!.uid}_${model.userId}").set({
                                   "user1":FirebaseAuth.instance.currentUser!.uid,
                                   "user2":model.userId,
+                                  "lastCounter":0,
+                                  "serverTime":FieldValue.serverTimestamp(),
                                   "timestamp":DateTime.now().millisecondsSinceEpoch,
                                 });
                                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) =>  ChatScreen("${FirebaseAuth.instance.currentUser!.uid}_${model.userId}")));

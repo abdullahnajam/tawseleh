@@ -23,13 +23,14 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isObscure = true;
   final _formKey = GlobalKey<FormState>();
+  String phone='';
   var _passwordController=TextEditingController();
 
 
 
 
 
-  String phone='';
+
 
   @override
   Widget build(BuildContext context) {

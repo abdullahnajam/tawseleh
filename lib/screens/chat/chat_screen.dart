@@ -224,7 +224,7 @@ class _IndividualChatState extends State<ChatScreen> {
                           stream: FirebaseFirestore.instance.collection('social_chat')
                               .where("groupId",isEqualTo: widget.chatheadId)
                               .where("visible",isEqualTo: false)
-                              .orderBy('dateTime',descending: true).snapshots(),
+                              .orderBy('count',descending: true).snapshots(),
                           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (snapshot.hasError) {
                               return Center(
@@ -254,6 +254,7 @@ class _IndividualChatState extends State<ChatScreen> {
                               reverse: true,
                               children: snapshot.data!.docs.map((DocumentSnapshot document) {
                                 Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                                print('serverTime ${document.reference.id} ${data['serverTime']}');
                                 ChatModel model=ChatModel.fromMap(data,document.reference.id);
                                 return Consumer<ChatProvider>(
                                   builder: (context,chat,child){

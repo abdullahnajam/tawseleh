@@ -115,17 +115,33 @@ class DBApi{
     final provider = Provider.of<ChatProvider>(context, listen: false);
     provider.chatReset();
     List<ChatHeadModel> chats=[];
+    List<SortChatHeadClass> sortList=[];
     await FirebaseFirestore.instance.collection('chat_head').get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
         Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
 
         if(getId(doc.reference.id,FirebaseAuth.instance.currentUser!.uid)!=""){
           chats.add(ChatHeadModel.fromMap(data, doc.reference.id));
+          sortList.add(SortChatHeadClass(ChatHeadModel.fromMap(data, doc.reference.id).serverTime.toDate(), doc.reference.id));
         }
       });
     });
     print("chat length ${chats.length}");
-    return chats;
+
+
+    sortList.sort((a,b) {
+      return a.date.compareTo(b.date);
+    });
+
+    List<ChatHeadModel> heads=[];
+    for(int i=0;i<sortList.length;i++){
+      chats.forEach((element) {
+        if(sortList[i].chatHeadId==element.id){
+          heads.add(element);
+        }
+      });
+    }
+    return heads.reversed.toList();
   }
 
   static Future<List<ChatModel>> getUnreadMessageCount(BuildContext context,chatHeadId)async{
@@ -146,7 +162,7 @@ class DBApi{
 
   static Future<ChatModel?> getLastMessage(chatHeadId)async{
     List<ChatModel> chats=[];
-    await FirebaseFirestore.instance.collection('social_chat').where("groupId",isEqualTo: chatHeadId).orderBy('dateTime')
+    await FirebaseFirestore.instance.collection('social_chat').where("groupId",isEqualTo: chatHeadId).orderBy('count')
         .get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
         Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
@@ -196,7 +212,21 @@ class DBApi{
   static Future changeGroupMessageToRead(BuildContext context,chatHeadId)async{
     await FirebaseFirestore.instance.collection('group_alert').doc('$chatHeadId-${FirebaseAuth.instance.currentUser!.uid}').delete();
   }
+  static Future<int> getChatLastMessageCounter(String chatId)async{
+    int counter=0;
+    await FirebaseFirestore.instance.collection('chat_head').doc(chatId).get().then((DocumentSnapshot documentSnapshot) async{
+      if (documentSnapshot.exists) {
+        print('exists');
+        Map<String, dynamic> data = documentSnapshot.data()! as Map<String, dynamic>;
+        ChatHeadModel model=ChatHeadModel.fromMap(data,documentSnapshot.reference.id);
+        counter=model.lastCounter;
+        counter+=1;
+        print('counter ${data}');
 
+      }
+    });
+    return counter;
+  }
   static Future<bool> checkIfBlocked(String id)async{
     bool blocked=false;
     print('block my id $id');
@@ -216,8 +246,11 @@ class DBApi{
   }
 
   static Future<String> storeChat(BuildContext context,String message,String groupId,mediaType,isRead)async{
+    FieldValue time=FieldValue.serverTimestamp();
     bool visible=await checkIfBlocked(getRecieverId(groupId));
-    print('visible $visible');
+    int counter=await getChatLastMessageCounter(groupId);
+
+    print('counter get $counter');
     print('groupId $groupId');
     final provider = Provider.of<UserDataProvider>(context, listen: false);
     var res=await FirebaseFirestore.instance.collection('social_chat').add({
@@ -229,7 +262,13 @@ class DBApi{
       "visible":visible,
       "message":message,
       "groupId":groupId,
+      "count":counter,
       "dateTime":DateTime.now().toUtc().millisecondsSinceEpoch,
+      "serverTime":time,
+    });
+    await FirebaseFirestore.instance.collection('chat_head').doc(groupId).update({
+      'lastCounter':counter,
+      "serverTime":time,
     });
     FirebaseFirestore.instance.collection('users').doc(getRecieverId(groupId)).get().then((DocumentSnapshot documentSnapshot) async{
       if (documentSnapshot.exists) {
@@ -320,5 +359,11 @@ class DBApi{
   }
 
 
+}
+class SortChatHeadClass{
+  DateTime date;
+  String chatHeadId;
+
+  SortChatHeadClass(this.date,this.chatHeadId);
 }
 

@@ -1,9 +1,10 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 class ChatModel{
-  String id,senderId,mediaType,message,receiverId,senderProfilePic;
+  String id,senderId,mediaType,message,receiverId,senderProfilePic,groupId;
   bool isRead,visible;
-  int dateTime;
+  int dateTime,count;
+  //Timestamp timestamp;
 
 
 
@@ -16,6 +17,9 @@ class ChatModel{
         isRead = map['isRead']??false,
         visible = map['visible']??true,
         message = map['message']??"",
+        groupId = map['groupId']??"",
+        count = map['count']??0,
+        //timestamp = map['serverTime'],
         dateTime = map['dateTime']??0;
 
 
